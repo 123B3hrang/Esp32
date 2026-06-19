@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "author": "Ronash R&D",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkitc-v4",
+      "id": "esp32",
+      "top": 120,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-74hc595",
+      "id": "sr595",
+      "top": -180,
+      "left": -230,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-74hc165",
+      "id": "sr165",
+      "top": -180,
+      "left": 180,
+      "attrs": {}
+    },
+    { "type": "wokwi-led", "id": "led1", "top": -330, "left": -370, "attrs": { "color": "red" } },
+    { "type": "wokwi-led", "id": "led2", "top": -330, "left": -330, "attrs": { "color": "red" } },
+    { "type": "wokwi-led", "id": "led3", "top": -330, "left": -290, "attrs": { "color": "red" } },
+    { "type": "wokwi-led", "id": "led4", "top": -330, "left": -250, "attrs": { "color": "red" } },
+    { "type": "wokwi-led", "id": "led5", "top": -330, "left": -210, "attrs": { "color": "red" } },
+    { "type": "wokwi-led", "id": "led6", "top": -330, "left": -170, "attrs": { "color": "red" } },
+    { "type": "wokwi-led", "id": "led7", "top": -330, "left": -130, "attrs": { "color": "red" } },
+    { "type": "wokwi-led", "id": "led8", "top": -330, "left": -90,  "attrs": { "color": "red" } },
+    { "type": "wokwi-pushbutton", "id": "btn1", "top": -330, "left": 40,  "attrs": { "label": "B1" } },
+    { "type": "wokwi-pushbutton", "id": "btn2", "top": -330, "left": 85,  "attrs": { "label": "B2" } },
+    { "type": "wokwi-pushbutton", "id": "btn3", "top": -330, "left": 130, "attrs": { "label": "B3" } },
+    { "type": "wokwi-pushbutton", "id": "btn4", "top": -330, "left": 175, "attrs": { "label": "B4" } },
+    { "type": "wokwi-pushbutton", "id": "btn5", "top": -330, "left": 220, "attrs": { "label": "B5" } },
+    { "type": "wokwi-pushbutton", "id": "btn6", "top": -330, "left": 265, "attrs": { "label": "B6" } },
+    { "type": "wokwi-pushbutton", "id": "btn7", "top": -330, "left": 310, "attrs": { "label": "B7" } },
+    { "type": "wokwi-pushbutton", "id": "btn8", "top": -330, "left": 355, "attrs": { "label": "B8" } }
+  ],
+  "connections": [
+    ["esp32:GND.1", "sr595:GND", "black",  ["v10"]],
+    ["esp32:GND.1", "sr165:GND", "black",  ["v10"]],
+
+    ["esp32:3V3",   "sr595:VCC", "red",    ["v10"]],
+    ["esp32:3V3",   "sr165:VCC", "red",    ["v10"]],
+
+    ["esp32:3V3",   "sr595:MR",  "red",    ["v10"]],
+
+    ["esp32:GND.1", "sr165:CE",  "black",  ["v10"]],
+
+    ["esp32:GND.1", "led1:C",    "black",  []],
+    ["esp32:GND.1", "led2:C",    "black",  []],
+    ["esp32:GND.1", "led3:C",    "black",  []],
+    ["esp32:GND.1", "led4:C",    "black",  []],
+    ["esp32:GND.1", "led5:C",    "black",  []],
+    ["esp32:GND.1", "led6:C",    "black",  []],
+    ["esp32:GND.1", "led7:C",    "black",  []],
+    ["esp32:GND.1", "led8:C",    "black",  []],
+
+    ["sr595:Q0",    "led1:A",    "red",    []],
+    ["sr595:Q1",    "led2:A",    "red",    []],
+    ["sr595:Q2",    "led3:A",    "red",    []],
+    ["sr595:Q3",    "led4:A",    "red",    []],
+    ["sr595:Q4",    "led5:A",    "red",    []],
+    ["sr595:Q5",    "led6:A",    "red",    []],
+    ["sr595:Q6",    "led7:A",    "red",    []],
+    ["sr595:Q7",    "led8:A",    "red",    []],
+
+    ["esp32:3V3",   "btn1:1.a",  "red",    []],
+    ["esp32:3V3",   "btn2:1.a",  "red",    []],
+    ["esp32:3V3",   "btn3:1.a",  "red",    []],
+    ["esp32:3V3",   "btn4:1.a",  "red",    []],
+    ["esp32:3V3",   "btn5:1.a",  "red",    []],
+    ["esp32:3V3",   "btn6:1.a",  "red",    []],
+    ["esp32:3V3",   "btn7:1.a",  "red",    []],
+    ["esp32:3V3",   "btn8:1.a",  "red",    []],
+
+    ["btn1:2.a",    "sr165:D0",  "blue",   []],
+    ["btn2:2.a",    "sr165:D1",  "blue",   []],
+    ["btn3:2.a",    "sr165:D2",  "blue",   []],
+    ["btn4:2.a",    "sr165:D3",  "blue",   []],
+    ["btn5:2.a",    "sr165:D4",  "blue",   []],
+    ["btn6:2.a",    "sr165:D5",  "blue",   []],
+    ["btn7:2.a",    "sr165:D6",  "blue",   []],
+    ["btn8:2.a",    "sr165:D7",  "blue",   []],
+
+    ["esp32:IO13",  "sr595:DS",  "blue",   []],
+
+    ["esp32:IO12",  "sr165:Q7",  "green",  []],
+
+    ["esp32:IO14",  "sr595:SH_CP", "yellow", []],
+    ["esp32:IO14",  "sr165:CP",    "yellow", []],
+
+    ["esp32:IO15",  "sr595:ST_CP", "orange", []],
+
+    ["esp32:IO4",   "sr595:OE",    "purple", []],
+
+    ["esp32:IO5",   "sr165:PL",    "cyan",   []],
+
+    ["sr595:Q7S",   "sr595:Q7S",   "gray",   []]
+  ]
+}
