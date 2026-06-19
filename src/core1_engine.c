@@ -198,9 +198,9 @@ static void task_input_poll(void *pvParameters)
                 current_relay_states ^= (1UL << bit);
                 uint32_t snapshot = current_relay_states;
 
-                ESP_LOGI(TAG, "Button %d pressed → relay %d toggled. "
-                              "All states: 0x%08lX",
-                         bit, bit, (unsigned long)snapshot);
+                ESP_LOGI("INPUT", "Button Pressed! GPIO bit=%d", bit);
+                ESP_LOGI(TAG, "Relay %d toggled → all states: 0x%08lX",
+                         bit, (unsigned long)snapshot);
 
                 /* b. Send to hardware_queue → task_spi_output drives 74HC595. */
                 hardware_event_t hw_evt = {

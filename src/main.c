@@ -13,6 +13,9 @@ static const char *TAG = "Main";
 
 void app_main(void)
 {
+    /* ── Earliest possible UART log — confirms bootloader handed off OK ── */
+    ESP_LOGI("BOOT", "System Starting!");
+
     /* ── Boot Banner ───────────────────────────────────────────────────── */
     ESP_LOGI(TAG, "=========================================");
     ESP_LOGI(TAG, "  Booting Smart Relay MVP...             ");

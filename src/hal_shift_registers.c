@@ -10,13 +10,15 @@
 static const char *TAG = "HAL_SPI";
 
 // --- Hardware Pin Definitions ---
-#define SPI_MOSI_PIN 13
-#define SPI_MISO_PIN 12
-#define SPI_SCLK_PIN 14
+// NOTE: GPIO 12 (MTDI) and GPIO 15 (MTDO) are strapping pins and must NOT be
+// driven by external hardware at boot. Using fully safe, non-strapping GPIOs.
+#define SPI_MOSI_PIN 23   // Safe: no strapping function
+#define SPI_MISO_PIN 19   // Safe: no strapping function
+#define SPI_SCLK_PIN 18   // Safe: no strapping function
 
-#define LATCH_PIN    15
-#define OE_PIN       4
-#define PL_PIN       5
+#define LATCH_PIN    26   // Safe: no strapping function
+#define OE_PIN       25   // Safe: no strapping function
+#define PL_PIN       27   // Safe: no strapping function
 
 // --- Global SPI Device Handles ---
 static spi_device_handle_t spi_out_handle;
