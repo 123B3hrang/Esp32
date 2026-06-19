@@ -157,8 +157,11 @@ static void task_input_poll(void *pvParameters)
 {
     (void)pvParameters;
 
-    uint32_t raw[DEBOUNCE_CYCLES] = {0};
-    uint32_t stable               = 0;
+    // Active-LOW wiring: 0xFF = all buttons unpressed (pulled HIGH by 10k resistors).
+    // Ring buffer must start at 0xFF; otherwise startup consensus = 0x00 (all bits
+    // look pressed) and the system fires 8 spurious toggle events at boot.
+    uint32_t raw[DEBOUNCE_CYCLES] = {0xFF, 0xFF, 0xFF, 0xFF};
+    uint32_t stable               = 0xFF; // 0xFF = no buttons pressed
     uint8_t  tick                 = 0;
 
     ESP_LOGI(TAG, "task_input_poll started (Core %d).", xPortGetCoreID());
@@ -166,8 +169,8 @@ static void task_input_poll(void *pvParameters)
     for (;;) {
         vTaskDelay(pdMS_TO_TICKS(INPUT_POLL_MS));
 
-        /* 1. Read raw button state from 74HC165 chain. */
-        uint32_t raw_sample = 0;
+        /* 1. Read raw 8-bit button state from 74HC165. */
+        uint32_t raw_sample = 0xFF;   // default: no press
         esp_err_t err = hal_74hc165_read(&raw_sample);
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "hal_74hc165_read failed: %s", esp_err_to_name(err));
@@ -178,18 +181,24 @@ static void task_input_poll(void *pvParameters)
         raw[tick % DEBOUNCE_CYCLES] = raw_sample;
         tick++;
 
-        /* 3. Compute consensus (all DEBOUNCE_CYCLES samples must agree). */
-        uint32_t consensus = 0xFFFFFFFFUL;
+        /* 3. Consensus via OR: a bit is confirmed LOW (pressed) only when ALL
+         *    DEBOUNCE_CYCLES samples have it LOW.  Using OR: if any sample has
+         *    the bit HIGH (bounce/noise), OR keeps it HIGH = unconfirmed press.
+         *    ~consensus_or gives the bits that are stably LOW = stably pressed. */
+        uint32_t consensus_or = 0x00;
         for (int i = 0; i < DEBOUNCE_CYCLES; i++) {
-            consensus &= raw[i];
+            consensus_or |= raw[i];
         }
+        uint32_t confirmed_pressed = (~consensus_or) & 0xFF; // 1 = stably pressed
 
-        /* 4. Rising-edge detection: bits newly pressed (not seen in stable). */
-        uint32_t new_pressed = consensus & ~stable;
+        /* 4. Falling-edge detection: bits that are now pressed but weren't before.
+         *    "stable" tracks the previous confirmed-pressed bitmask (active-HIGH
+         *    representation: 1 = pressed). */
+        uint32_t new_pressed = confirmed_pressed & ~stable;
 
         if (new_pressed != 0) {
-            /* 5. Process each newly-pressed button independently. */
-            for (uint8_t bit = 0; bit < 32; bit++) {
+            /* 5. Process each newly-pressed button independently (8 channels). */
+            for (uint8_t bit = 0; bit < 8; bit++) {
                 if (!(new_pressed & (1UL << bit))) {
                     continue;
                 }
@@ -224,8 +233,8 @@ static void task_input_poll(void *pvParameters)
             }
         }
 
-        /* 6. Advance stable baseline. */
-        stable = consensus;
+        /* 6. Advance stable baseline (confirmed-pressed representation). */
+        stable = confirmed_pressed;
     }
 }
 

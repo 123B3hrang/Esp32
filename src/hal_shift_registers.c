@@ -12,13 +12,12 @@ static const char *TAG = "HAL_SPI";
 // --- Hardware Pin Definitions ---
 // NOTE: GPIO 12 (MTDI) and GPIO 15 (MTDO) are strapping pins and must NOT be
 // driven by external hardware at boot. Using fully safe, non-strapping GPIOs.
-#define SPI_MOSI_PIN 23   // Safe: no strapping function
-#define SPI_MISO_PIN 19   // Safe: no strapping function
-#define SPI_SCLK_PIN 18   // Safe: no strapping function
-
-#define LATCH_PIN    26   // Safe: no strapping function
-#define OE_PIN       25   // Safe: no strapping function
-#define PL_PIN       27   // Safe: no strapping function
+#define SPI_MOSI_PIN 23
+#define SPI_MISO_PIN 19
+#define SPI_SCLK_PIN 18
+#define LATCH_PIN    26
+#define OE_PIN       25
+#define PL_PIN       27  // Safe: no strapping function
 
 // --- Global SPI Device Handles ---
 static spi_device_handle_t spi_out_handle;
@@ -93,16 +92,13 @@ esp_err_t hal_spi_init(void) {
 }
 
 esp_err_t hal_74hc595_update(uint32_t relay_states) {
-    // Memory Safety: Explicit 4-byte buffer (prevents stack overflow)
-    uint8_t tx_buffer[4];
-    tx_buffer[0] = (uint8_t)((relay_states >> 24) & 0xFF);
-    tx_buffer[1] = (uint8_t)((relay_states >> 16) & 0xFF);
-    tx_buffer[2] = (uint8_t)((relay_states >> 8)  & 0xFF);
-    tx_buffer[3] = (uint8_t)(relay_states & 0xFF);
+    // 8-bit mode: Wokwi diagram has one 74HC595 = 8 output channels
+    uint8_t tx_buffer[1];
+    tx_buffer[0] = (uint8_t)(relay_states & 0xFF);
 
     spi_transaction_t t;
     memset(&t, 0, sizeof(t));
-    t.length = 32; // 32 bits
+    t.length = 8; // 8 bits (single 74HC595)
     t.tx_buffer = tx_buffer;
 
     // Thread Safety: Lock the shared SPI bus
@@ -129,12 +125,12 @@ esp_err_t hal_74hc595_update(uint32_t relay_states) {
 esp_err_t hal_74hc165_read(uint32_t *button_states) {
     if (button_states == NULL) return ESP_ERR_INVALID_ARG;
 
-    // Memory Safety: Explicit 4-byte buffer initialized to zero
-    uint8_t rx_buffer[4] = {0};
+    // 8-bit mode: Wokwi diagram has one 74HC165 = 8 input channels
+    uint8_t rx_buffer[1] = {0};
 
     spi_transaction_t t;
     memset(&t, 0, sizeof(t));
-    t.length = 32; // 32 bits
+    t.length = 8; // 8 bits (single 74HC165)
     t.tx_buffer = NULL;
     t.rx_buffer = rx_buffer;
 
@@ -149,16 +145,13 @@ esp_err_t hal_74hc165_read(uint32_t *button_states) {
 
     // Receive
     err = spi_device_polling_transmit(spi_in_handle, &t);
-    
+
     // Thread Safety: Release the shared SPI bus
     spi_device_release_bus(spi_in_handle);
 
     if (err == ESP_OK) {
-        // Safely map cascaded bytes into absolute 32-bit state
-        *button_states = ((uint32_t)rx_buffer[0] << 24) |
-                         ((uint32_t)rx_buffer[1] << 16) |
-                         ((uint32_t)rx_buffer[2] << 8)  |
-                         ((uint32_t)rx_buffer[3]);
+        // Map single byte to button_states (8-bit active-LOW: 0=pressed, 1=not pressed)
+        *button_states = rx_buffer[0];
     }
 
     return err;
