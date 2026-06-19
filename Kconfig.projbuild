@@ -1,0 +1,31 @@
+menu "Tuya Platform Configuration"
+
+    config APP_USE_DUMMY_CREDENTIALS
+        bool "Use Dummy Credentials (Open-Source Fallback)"
+        default y
+        help
+            Enable this to fallback to the dummy credentials below if the factory NVS 
+            does not contain the required Tuya keys. Essential for public GitHub clones.
+
+    config APP_DUMMY_PID
+        string "Dummy Product ID (PID)"
+        depends on APP_USE_DUMMY_CREDENTIALS
+        default "dummy_pid_xxxx"
+        help
+            Fallback Tuya Product ID.
+
+    config APP_DUMMY_UUID
+        string "Dummy UUID"
+        depends on APP_USE_DUMMY_CREDENTIALS
+        default "dummy_uuid_yyyy"
+        help
+            Fallback Tuya Device UUID.
+
+    config APP_DUMMY_AUTH_KEY
+        string "Dummy Auth Key"
+        depends on APP_USE_DUMMY_CREDENTIALS
+        default "dummy_auth_key_zzzz"
+        help
+            Fallback Tuya Authorization Key.
+
+endmenu
